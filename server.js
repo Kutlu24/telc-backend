@@ -3,12 +3,25 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sqlite3 = require("sqlite3").verbose();
+const crypto = require("crypto");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const SECRET = "TELC_SECRET_KEY";
+// SECURITY: never hardcode this. Set JWT_SECRET in your deployment's
+// environment variables (e.g. Render > Environment) for stable sessions
+// across restarts. Without it, a random secret is generated at boot,
+// which means every restart invalidates existing login tokens.
+if (!process.env.JWT_SECRET) {
+  console.warn(
+    "[telc-backend] WARNING: JWT_SECRET is not set. Using a temporary " +
+      "random secret for this process only — all users will be logged " +
+      "out on the next restart. Set JWT_SECRET in your environment for " +
+      "production."
+  );
+}
+const SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString("hex");
 
 /* ===== DB ===== */
 const db = new sqlite3.Database("./telc.db");
