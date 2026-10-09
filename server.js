@@ -76,7 +76,7 @@ function registrationBlocked() {
 }
 
 /* ===== DB ===== */
-const db = new sqlite3.Database("./telc.db");
+const db = new sqlite3.Database(process.env.TELC_DB_PATH || "./telc.db");
 
 db.serialize(() => {
   db.run(`
@@ -240,4 +240,8 @@ app.post("/login", (req, res) => {
 
 /* ===== START ===== */
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server läuft auf Port", PORT));
+if (require.main === module) {
+  app.listen(PORT, () => console.log("Server läuft auf Port", PORT));
+}
+
+module.exports = app;
